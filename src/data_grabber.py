@@ -15,7 +15,28 @@ class MonthlyState:
         grabber = grabber
 
     def build(self):
-        pass   
+        if self.grabber == None:
+            raise Exception("No grabber called for state class")
+        end = self.grabber.endtime
+        start = self.grabber.starttime
+        datelist = (start + datetime.timedelta(days=x) for x in range(0, (end-start).days))
+        try:
+            self.grabber.createDir(str(start.year))
+        except FileExistsError as fe:
+            logging.warning(f"Directory for {str(start.year)} already exists")
+            logging.warning(f"Via error: fe")
+        curr_year = start.year
+        for n in datelist:
+            source = self.grabber.url + \
+              "/" + str(n.year) + "/" + str(n.month) + "/" + str(n.day) + "/" +\
+              self.grabber.filename
+            destination = self.grabber.home + \
+              "/" + str(n.year) + "/" + str(n.month) + "/" + str(n.day) + "/" + \
+              self.grabber.filename
+            if n.year > curr_year:
+                self.grabber.createDir(grabber.home + str(n.year))
+                curr_year = n.year
+
 
 
 class DailyState:
@@ -34,7 +55,9 @@ class DailyState:
             self.grabber.createDir(str(start.year))
             self.grabber.createDir(str(start.year) + '/' + str(start.month))
         except FileExistsError as fe:
-            print("WARNING: existing director exists")
+            logging.warning(f"Directory for {str(start.year)} already exists")
+            logging.warning(f"Via error: fe")
+            
         curr_year = start.year
         curr_month = start.month
         for n in datelist:
